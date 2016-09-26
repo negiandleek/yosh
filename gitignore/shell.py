@@ -2,16 +2,10 @@ import os
 import sys
 import shlex
 from constants import *;
-from builtins import *;
-
+from modules import *;
 
 # Hash map to store built-in function name and reference as key and value
 built_in_cmds = {}
-
-def cd(args):
-    os.chdir(args[0])
-
-    return SHELL_STATUS_RUN
 
 def shell_loop():
     status = SHELL_STATUS_RUN
@@ -52,6 +46,7 @@ def execute(cmd_tokens):
     # Child process
         # Replace the child shell process with the program called with exec
         os.execvp(cmd_tokens[0], cmd_tokens)
+    
     elif pid > 0:
     # Parent process
         while True:
@@ -74,7 +69,7 @@ def register_command(name, func):
 def init():
     register_command("exit", exit)
     register_command("cd", cd)
-
+    register_command("gitignore", gitignore)
 
 def main():
     init();
