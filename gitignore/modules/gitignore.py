@@ -6,15 +6,70 @@ from constants import *
 print("import gitignore");
 
 def gitignore(args):
-	cmd = "find ./ -name __init__.py";
-	result = subprocess.Popen(cmd, stdout=subprocess.PIPE,shell=True).stdout.readlines();
+	if args[0] == "init":
+		try:
+			path_arg = args[1];
+			dir_path = os.path.abspath(path_arg);
 
-	result_list = [item.rstrip() for item in result]
+		except:
+			dir_path = os.path.abspath("./");
 
-	cmd = "find ./ -name __pycache__";
-	result = subprocess.Popen(cmd, stdout=subprocess.PIPE,shell=True).stdout.readlines();
+		gitignore_path = dir_path + "/.gitignore";
+		is_gitignore = os.path.isfile(gitignore_path);
 
-	result_list = [item.rstrip() for item in result]
-	print(result_list);
+		if is_gitignore:
+			print("すでに.gitignoreは存在します")
+		else:
+			f = open(gitignore_path, "w");
+			f.write("#");
+			f.close();
+
+		return SHELL_STATUS_RUN;
+
+	else:
+		gitignore_path = "./.gitignore";
+		is_gitignore = os.path.isfile(gitignore_path);
+
+		if not is_gitignore:
+			print(".gitignoreが見つかりません")
+			return SHELL_STATUS_RUN;
+
+		with open (gitignore_path,"r") as f:
+			data = f.readlines();
+
+		none_line_feed_text = data[0].replace(",\n", "").replace("#","");
+		li_directory_data = none_line_feed_text.split(",");
+
+		i = 0;
+		while True:
+			try:
+				args[i];
+			except:
+				break;
+
+			try:
+				for directory in li_directory_data:
+					if directory == args[i]:
+						print(args[i]+" はすでにgitignoreされています")
+						i += 1;
+
+						raise Exception;
+			except:
+				continue;
+
+			_data = data[0].replace("\n", "") + args[i] + "," + "\n";
+			data[0] = _data;
+
+			cmd = "find ./ -name " + args[i];
+			result = subprocess.Popen(cmd, stdout=subprocess.PIPE,shell=True).stdout.readlines();
+
+			for item in result:
+				data.append(item.decode('utf-8'));
+				
+			i += 1;
+
+			with open (gitignore_path, "w") as f:
+				f.writelines(data);
+
 
 	return SHELL_STATUS_RUN
