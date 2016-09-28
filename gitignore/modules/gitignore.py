@@ -41,11 +41,17 @@ def gitignore(args):
 		li_directory_data = none_line_feed_text.split(",");
 
 		i = 0;
+		is_dir = False;
 		while True:
 			try:
 				args[i];
+				if args[i] == "-d":
+					is_dir = True;
+					i += 1;
+					args[i];
 			except:
 				break;
+
 
 			try:
 				for directory in li_directory_data:
@@ -63,10 +69,18 @@ def gitignore(args):
 			cmd = "find ./ -name " + args[i];
 			result = subprocess.Popen(cmd, stdout=subprocess.PIPE,shell=True).stdout.readlines();
 
-			for item in result:
-				data.append(item.decode('utf-8'));
+			if is_dir:
+				for item in result:
+					create_line = item.decode("utf-8").replace("\n","") + "/" + "\n";
+					data.append(create_line);
+	
+				is_dir = False;
+			else:
+				for item in result:
+					data.append(item.decode('utf-8'));
 				
 			i += 1;
+			print(data)
 
 			with open (gitignore_path, "w") as f:
 				f.writelines(data);
